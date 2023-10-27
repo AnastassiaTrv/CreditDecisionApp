@@ -40,15 +40,15 @@ public class DecisionService {
             } else if (score > 0 && score < 1) {
                 // this is the most difficult case,
                 // if the score is less than 1 but still positive then we can try first to decrease the amount,
-                // and if the new amount is smaller than min we then try to desrease also the period
+                // and if the new amount is smaller than min we then try to increase the period
                 BigDecimal newAmount = changeAmountByScore(amount, score);
                 if (isGreatherOrEqual(newAmount, minAmount)) {
                     decision.setAmount(newAmount);
                     decision.setStatus(POSITIVE);
                 } else {
                     newAmount = minAmount;
-                    int newPeriod = changePeriodByScore(period, score);
-                    if (newPeriod >= minPeriod) {
+                    int newPeriod = increasePeriodByScore(period, score);
+                    if (newPeriod <= maxPeriod) {
                         decision.setAmount(newAmount);
                         decision.setPeriod(newPeriod);
                         decision.setStatus(POSITIVE);
@@ -97,13 +97,11 @@ public class DecisionService {
     }
 
     private BigDecimal changeAmountByScore(BigDecimal initialAmount, double score) {
-        BigDecimal score_ = BigDecimal.valueOf(score);
-        BigDecimal mul = initialAmount.multiply(score_);
-        return mul;
+        return initialAmount.multiply(BigDecimal.valueOf(score));
     }
 
-    private Integer changePeriodByScore(int period, double customerScore) {
-        double changed = Math.ceil(period * customerScore);
+    private int increasePeriodByScore(int period, double customerScore) {
+        double changed = Math.ceil((double) period / customerScore);
         return (int) changed;
     }
     
