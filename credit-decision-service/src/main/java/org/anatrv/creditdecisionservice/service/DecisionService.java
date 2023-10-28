@@ -1,8 +1,6 @@
 package org.anatrv.creditdecisionservice.service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 
 import org.anatrv.creditdecisionservice.config.CreditProperties;
 import org.anatrv.creditdecisionservice.gateway.CreditRatingGateway;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Service;
 import static org.anatrv.creditdecisionservice.model.CreditDecisionStatus.APROOVED;
 import static org.anatrv.creditdecisionservice.model.CreditDecisionStatus.REJECTED;
 import static org.anatrv.creditdecisionservice.model.CreditDecisionStatus.UNDEFINED;
+import static org.anatrv.creditdecisionservice.utils.DecisionUtils.*;
 
 @Service
 public class DecisionService {
@@ -58,17 +57,15 @@ public class DecisionService {
                 amountOffered = changeAmountByScore(amountOffered, score);
                 if (isGreather(amountOffered, minAmount)) {
                     aprooveDecision(decision, amountOffered, periodOffered, "");
-
                 } else if (isEqual(amountOffered, minAmount)) {
                     // if offered amount equals to min, then we try to increase a period but keep it within or min-max range
                     int newPeriod = changePeriodByScore(periodOffered, score);
                     newPeriod = getPeriodInRange(newPeriod, minPeriod, maxPeriod);
                     aprooveDecision(decision, amountOffered, newPeriod, "Aprooved with increased period");
-
                 } else {
                     //  we can offer only min amount and not less, but then we have to increase the period
                     int newPeriod = changePeriodByScore(periodOffered, score);
-                    if (newPeriod <= maxPeriod) {
+                    if (newPeriod < maxPeriod) {
                         aprooveDecision(decision, minAmount, newPeriod, "");
                     } else {
                         // we cannot offer a loan that would fit into our amount and period constraints
@@ -85,25 +82,6 @@ public class DecisionService {
         return decision;
     }
 
-    private int getPeriodInRange(int period, int min, int max) {
-        if (period < min) {
-            period = min;
-        } else if (period > max) {
-            period = max;
-        }
-        return period;
-    }
-
-    private boolean isGreather(BigDecimal amount, BigDecimal test) {
-        int comparison = amount.compareTo(test);
-        return comparison == 1;
-    }
-
-    private boolean isEqual(BigDecimal amount, BigDecimal test) {
-        int comparison = amount.compareTo(test);
-        return comparison == 0;
-    }
-
     private void aprooveDecision(CreditDecision decision, BigDecimal aproovedAmount, Integer aproovedPeriod, String message) {
         decision.setStatus(APROOVED);
         decision.setAmountAprooved(aproovedAmount);
@@ -114,21 +92,6 @@ public class DecisionService {
     private void rejectDecision(CreditDecision decision, String message) {
         decision.setStatus(REJECTED);
         decision.setMsg(message);
-    }
-
-    private BigDecimal changeAmountByScore(BigDecimal initialAmount, double score) {
-        BigDecimal changed = initialAmount.multiply(BigDecimal.valueOf(score)).setScale(0, RoundingMode.DOWN);
-        return round(changed, 2);
-    }
-
-    private BigDecimal round(BigDecimal initial, int precision) {
-        BigDecimal rounded = initial.round(new MathContext(precision, RoundingMode.HALF_DOWN));
-        return new BigDecimal(rounded.toPlainString()); // to get rid of scientific notation
-    }
-
-    private int changePeriodByScore(int period, double customerScore) {
-        double changed = Math.ceil((double) period / customerScore);
-        return (int) changed;
     }
     
 }
