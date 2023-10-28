@@ -1,5 +1,7 @@
 package org.anatrv.creditdecisionservice.service;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -200,6 +202,44 @@ public class DecisionServiceTest {
         assertThat(decision.getStatus()).isEqualTo(UNDEFINED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
+    }
+
+    @Test
+    public void getCreditDecision_shouldUseMinPeriod_ifRequestedPeriodIsSmallerThanMin() {
+        String customerId = "id";
+        BigDecimal requestedAmount = BigDecimal.valueOf(5000);
+        Integer period = 9;
+
+        double score = 2.5;
+
+        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(amountMax), anyInt())).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, periodMin);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(periodMin);
+    }
+
+    @Test
+    public void getCreditDecision_shouldUseMaxPeriod_ifRequestedPeriodIsGreatherThanMax() {
+        String customerId = "id";
+        BigDecimal requestedAmount = BigDecimal.valueOf(5000);
+        Integer period = 66;
+
+        double score = 2.5;
+
+        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(amountMax), anyInt())).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, periodMax);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(periodMax);
     }
     
 }
