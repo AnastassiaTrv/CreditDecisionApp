@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ export class CreditDecisionService {
     .set("amount", amount.toString())
     .set("period", period.toString())
 
-    return this.http.get('http://localhost:8080/api/credit-decision', {params: params});
+    const url = environment.apiBaseUrl + 'credit-decision';
+    return this.http.get(url, {params: params});
   }
 }
