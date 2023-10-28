@@ -25,7 +25,7 @@ public class CreditDecisionController {
     @GetMapping
     public CreditDecision getCreditDecision(@RequestParam String customerId, 
                                             @RequestParam BigDecimal amount, 
-                                            @RequestParam Integer period) {
+                                            @RequestParam int period) {
         return decisionService.getCreditDecision(customerId, amount, period);
     }
     

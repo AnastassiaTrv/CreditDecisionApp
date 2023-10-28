@@ -14,11 +14,11 @@ public class CreditDecision {
 
     // what the customer wants
     private BigDecimal amountRequested;
-    private Integer periodRequested;
+    private int periodRequested;
 
     // what we can offer
     private BigDecimal amountAprooved;
-    private Integer periodAprooved;
+    private int periodAprooved;
 
     // I think it's good to provide the customer with some explanation about the decision
     private String msg;

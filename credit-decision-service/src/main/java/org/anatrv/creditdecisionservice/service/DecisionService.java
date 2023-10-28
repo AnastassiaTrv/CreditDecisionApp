@@ -23,22 +23,19 @@ public class DecisionService {
     @Autowired
     private CreditProperties properties;
 
-    public CreditDecision getCreditDecision(String customerId, BigDecimal requestedAmount, Integer period) {
+    public CreditDecision getCreditDecision(String customerId, BigDecimal amountRequested, int periodRequested) {
         BigDecimal maxAmount = properties.getAmountMax();
         BigDecimal minAmount = properties.getAmountMin();
         int maxPeriod = properties.getPeriodMax();
         int minPeriod = properties.getPeriodMin();
 
-        var decision = new CreditDecision();
-        decision.setAmountRequested(requestedAmount);
-        decision.setPeriodRequested(period);
-        decision.setStatus(UNDEFINED);
+        var decision = buildRawDecision(amountRequested, periodRequested);
 
         // I think we can try to get the credit score for the max amount and then just decrease it if the score is less than 1
         BigDecimal amountOffered = maxAmount;
 
         // don't reject the decision if the initial period doesn't fit into our constraints, just adjust the period and proceed 
-        int periodOffered = getPeriodInRange(period, minPeriod, maxPeriod);
+        int periodOffered = getPeriodInRange(periodRequested, minPeriod, maxPeriod);
 
         CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(customerId, amountOffered, periodOffered);
         if (customerScore == null) {
@@ -50,23 +47,22 @@ public class DecisionService {
         } else {
             double score = customerScore.getValue();
             if (score >= 1) {
-                aprooveDecision(decision, amountOffered, periodOffered, "Aprooved with greather amount");
+                aprooveDecision(decision, amountOffered, periodOffered);
             } else if (score < 1 && score > 0) {
                 // if the score is less than 1 but still positive then we can try first to decrease the amount,
                 // and if the new amount is smaller than min we then try to increase the period
                 amountOffered = changeAmountByScore(amountOffered, score);
                 if (isGreather(amountOffered, minAmount)) {
-                    aprooveDecision(decision, amountOffered, periodOffered, "");
+                    aprooveDecision(decision, amountOffered, periodOffered);
                 } else if (isEqual(amountOffered, minAmount)) {
                     // if offered amount equals to min, then we try to increase a period but keep it within or min-max range
-                    int newPeriod = changePeriodByScore(periodOffered, score);
-                    newPeriod = getPeriodInRange(newPeriod, minPeriod, maxPeriod);
-                    aprooveDecision(decision, amountOffered, newPeriod, "Aprooved with increased period");
+                    periodOffered = changePeriodByScore(periodOffered, score);
+                    aprooveDecision(decision, amountOffered, getPeriodInRange(periodOffered, minPeriod, maxPeriod));
                 } else {
                     //  we can offer only min amount and not less, but then we have to increase the period
-                    int newPeriod = changePeriodByScore(periodOffered, score);
-                    if (newPeriod < maxPeriod) {
-                        aprooveDecision(decision, minAmount, newPeriod, "");
+                    periodOffered = changePeriodByScore(periodOffered, score);
+                    if (periodOffered < maxPeriod) {
+                        aprooveDecision(decision, minAmount, periodOffered);
                     } else {
                         // we cannot offer a loan that would fit into our amount and period constraints
                         rejectDecision(decision, "Customer credit score is too low");
@@ -82,11 +78,18 @@ public class DecisionService {
         return decision;
     }
 
-    private void aprooveDecision(CreditDecision decision, BigDecimal aproovedAmount, Integer aproovedPeriod, String message) {
+    private CreditDecision buildRawDecision(BigDecimal amountRequested, int periodRequested) {
+        var decision = new CreditDecision();
+        decision.setAmountRequested(amountRequested);
+        decision.setPeriodRequested(periodRequested);
+        decision.setStatus(UNDEFINED);
+        return decision;
+    }
+
+    private void aprooveDecision(CreditDecision decision, BigDecimal aproovedAmount, Integer aproovedPeriod) {
         decision.setStatus(APROOVED);
         decision.setAmountAprooved(aproovedAmount);
         decision.setPeriodAprooved(aproovedPeriod);
-        decision.setMsg(message);
     }
 
     private void rejectDecision(CreditDecision decision, String message) {

@@ -164,7 +164,7 @@ public class DecisionServiceTest {
         verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isNull();
-        assertThat(decision.getPeriodAprooved()).isNull();
+        assertThat(decision.getPeriodAprooved()).isEqualTo(0);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class DecisionServiceTest {
         verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isNull();
-        assertThat(decision.getPeriodAprooved()).isNull();
+        assertThat(decision.getPeriodAprooved()).isEqualTo(0);
     }
 
     @Test
@@ -199,7 +199,7 @@ public class DecisionServiceTest {
         verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
         assertThat(decision.getStatus()).isEqualTo(UNDEFINED);
         assertThat(decision.getAmountAprooved()).isNull();
-        assertThat(decision.getPeriodAprooved()).isNull();
+        assertThat(decision.getPeriodAprooved()).isEqualTo(0);
     }
     
 }
