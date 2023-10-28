@@ -14,12 +14,12 @@ export class AskForCreditComponent implements OnInit {
   amount: number;
   period: number;
   decision: any;
+  showInputError = false;
 
-  ngOnInit() {
-
-  }
+  ngOnInit() { }
 
   askForCredit() {
+    this.cleanupPreviousResponse();
     this.creditDecisionService.getCreditDecision(this.customerId, this.amount, this.period)
     .subscribe(
       decision => {
@@ -27,8 +27,17 @@ export class AskForCreditComponent implements OnInit {
       },
       error => {
         this.decision = null;
-        console.log(error);
+        this.showInputError = error.status === 400; // just wanted to handle a bad request case somehow
       });
+  }
+
+  disableButton() {
+    return !this.customerId || !this.amount || !this.period;
+  }
+
+  cleanupPreviousResponse() {
+    this.decision = null;
+    this.showInputError = false;
   }
 
 }

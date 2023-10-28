@@ -12,11 +12,17 @@
         <input [(ngModel)]="period" name="period" type="text" class="form-control" id="period">
     </div>
     <div class="col-auto align-self-end">
-        <button type="button" class="btn btn-primary" (click)="askForCredit()">Apply for credit!</button>
+        <button type="button" class="btn btn-primary" (click)="askForCredit()" [disabled]="disableButton()">Apply for credit!</button>
     </div>
 </div>
 <div class="row mt-5">
     <div class="col-auto" *ngIf="decision">
         <app-credit-decision [decision]="decision"></app-credit-decision>
     </div>
+    <div class="col-lg" *ngIf="showInputError">
+        <div class="alert alert-danger align-self-end" role="alert">
+            Unable to obtain credit decision. Input data is wrong.
+        </div>
+    </div>
 </div>
+
