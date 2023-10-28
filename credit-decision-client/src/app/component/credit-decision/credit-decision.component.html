@@ -1,0 +1,20 @@
+<table class="table" [ngClass]="getTableClass()">
+    <thead>
+      <tr>
+        <th scope="col">Requested amount</th>
+        <th scope="col">Aprooved amount</th>
+        <th scope="col">Requested period</th>
+        <th scope="col">Aprooved period</th>
+        <th scope="col" *ngIf="decision.msg">Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ decision.amountRequested }}</td>
+        <td>{{ decision.amountAprooved }}</td>
+        <td>{{ decision.periodRequested }}</td>
+        <td>{{ decision.periodAprooved }}</td>
+        <td *ngIf="decision.msg">{{ decision.msg }}</td>
+      </tr>
+    </tbody>
+  </table>

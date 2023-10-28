@@ -1,0 +1,22 @@
+<div class="row align-items-center gx-5 mt-5 text-center">
+    <div class="col-auto">
+        <label for="customerId" class="form-label">Customer ID</label>
+        <input [(ngModel)]="customerId" name="customerId" type="text" class="form-control" id="customerId">
+    </div>
+    <div class="col-auto">
+        <label for="amount" class="form-label">Amount</label>
+        <input [(ngModel)]="amount" name="amount" type="text" class="form-control" id="amount">
+    </div>
+    <div class="col-auto">
+        <label for="period" class="form-label">Period</label>
+        <input [(ngModel)]="period" name="period" type="text" class="form-control" id="period">
+    </div>
+    <div class="col-auto align-self-end">
+        <button type="button" class="btn btn-primary" (click)="askForCredit()">Apply for credit!</button>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-auto" *ngIf="decision">
+        <app-credit-decision [decision]="decision"></app-credit-decision>
+    </div>
+</div>
