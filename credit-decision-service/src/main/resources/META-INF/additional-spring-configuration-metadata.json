@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "constraints.credit.amountMin",
+    "type": "java.lang.String",
+    "description": "Configured minimum loan amount that can be aprooved"
+  },
+  {
+    "name": "constraints.credit.periodMax",
+    "type": "java.lang.String",
+    "description": "Configured maximum loan amount that can be aprooved"
+  },
+  {
+    "name": "constraints.credit.amountMin",
+    "type": "java.lang.String",
+    "description": "Configured minimum loan period can be offered"
+  },
+  {
+    "name": "constraints.credit.periodMax",
+    "type": "java.lang.String",
+    "description": "Configured maximum loan period can be offered"
+  }
+]}

@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class CustomerCreditScore {
     private String customerId;
-    private Double value;
+    private double value;
 }

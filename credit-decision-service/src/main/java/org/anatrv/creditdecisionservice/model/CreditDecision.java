@@ -2,17 +2,24 @@ package org.anatrv.creditdecisionservice.model;
 
 import java.math.BigDecimal;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreditDecision {
     private CreditDecisionStatus status;
-    private BigDecimal amount;
-    private Integer period;
 
-    public CreditDecision(CreditDecisionStatus status, BigDecimal amount, Integer period) {
-        this.status = status;
-        this.amount = amount;
-        this.period = period;
-    }
+    // what the customer wants
+    private BigDecimal amountRequested;
+    private Integer periodRequested;
+
+    // what we can offer
+    private BigDecimal amountAprooved;
+    private Integer periodAprooved;
+
+    // I think it's good to provide the customer with some explanation about the decision
+    private String msg;
 }
