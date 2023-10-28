@@ -82,6 +82,8 @@ public class DecisionService {
         var decision = new CreditDecision();
         decision.setAmountRequested(amountRequested);
         decision.setPeriodRequested(periodRequested);
+        decision.setAmountAprooved(BigDecimal.ZERO);
+        decision.setPeriodAprooved(0);
         decision.setStatus(UNDEFINED);
         return decision;
     }
