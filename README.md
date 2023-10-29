@@ -21,7 +21,7 @@ So there can be 4 different scenarios + the case when the score cannot be obtain
 </p>
 3. Credit score is still too low, but the service can offer smaller amount (and maybe change the period as well)
 <p align="left">
-  <img src="./demo/credit_aprooved.png" width="500">
+  <img src="./demo/low_score_changed.png" width="500">
 </p>
 4. Credit score is good and a higher amount can be aprooved
 <p align="left">
