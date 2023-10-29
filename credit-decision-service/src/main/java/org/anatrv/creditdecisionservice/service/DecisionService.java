@@ -31,11 +31,11 @@ public class DecisionService {
 
         var decision = buildRawDecision(amountRequested, periodRequested);
 
-        // don't reject the decision if the initial period doesn't fit into our constraints, just adjust the period and proceed 
+        // don't reject the decision if the requested period and amount don't fit into our constraints, just adjust them and proceed 
         int periodOffered = getPeriodInRange(periodRequested, minPeriod, maxPeriod);
-        BigDecimal amountOffered = null;
+        BigDecimal amountOffered = getAmountInRange(amountRequested, minAmount, maxAmount);
 
-        CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(customerId, amountRequested, periodOffered);
+        CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(customerId, amountOffered, periodOffered);
         if (customerScore == null) {
             // if for some reason external service experiences a trouble and cannot provide us with credit score
             // then we are unable to make a credit decision, we don't want to reject the credit and give a customer bad experience with our service,
@@ -46,14 +46,14 @@ public class DecisionService {
             double score = customerScore.getValue();
             if (score > 1) {
                 // we can increase the amount but keep it in range
-                amountOffered = changeAmountByScore(amountRequested, score);
+                amountOffered = changeAmountByScore(amountOffered, score);
                 aprooveDecision(decision, getAmountInRange(amountOffered, minAmount, maxAmount), periodOffered);
             } else if (score == 1) {
-                aprooveDecision(decision, amountRequested, periodOffered);
+                aprooveDecision(decision, amountOffered, periodOffered);
             } else if (score < 1 && score > 0) {
                 // if the score is less than 1 but still positive then we can try first to decrease the amount,
                 // and if the new amount is smaller than min we then try to increase the period
-                amountOffered = changeAmountByScore(amountRequested, score);
+                amountOffered = changeAmountByScore(amountOffered, score);
                 if (isGreatherOrEqual(amountOffered, minAmount)) {
                     aprooveDecision(decision, amountOffered, periodOffered);
                 } else {

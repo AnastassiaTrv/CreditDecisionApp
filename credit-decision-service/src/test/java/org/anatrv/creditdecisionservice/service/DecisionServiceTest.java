@@ -52,7 +52,7 @@ public class DecisionServiceTest {
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveMaxAmount_ifScoreIsMoreThat1() {
+    public void getCreditDecision_shouldAprooveMaxAmount_ifScoreIsMoreThanOne() {
         String customerId = "id";
         BigDecimal requestedAmount = BigDecimal.valueOf(5000);
         Integer period = 15;
@@ -71,7 +71,7 @@ public class DecisionServiceTest {
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveIncreasedAmount_ifScoreIsMoreThatOne() {
+    public void getCreditDecision_shouldAprooveIncreasedAmount_ifScoreIsMoreThanOne() {
         String customerId = "id";
         BigDecimal requestedAmount = BigDecimal.valueOf(5000);
         Integer period = 15;
@@ -91,7 +91,7 @@ public class DecisionServiceTest {
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveRequestedAmount_ifScoreIs1() {
+    public void getCreditDecision_shouldAprooveRequestedAmount_ifScoreIsEqualToOne() {
         String customerId = "id";
         BigDecimal requestedAmount = BigDecimal.valueOf(5000);
         Integer period = 15;
@@ -260,6 +260,44 @@ public class DecisionServiceTest {
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
         assertThat(decision.getPeriodAprooved()).isEqualTo(periodMax);
+    }
+
+    @Test
+    public void getCreditDecision_shouldUseMinAmount_ifRequestedAmountIsSmallerThanMin() {
+        String customerId = "id";
+        BigDecimal requestedAmount = BigDecimal.valueOf(1800);
+        Integer period = 12;
+
+        double score = 1.0;
+
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMin, period)).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMin, period);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(amountMin);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(period);
+    }
+
+    @Test
+    public void getCreditDecision_shouldUseMaxAmount_ifRequestedAmountIsGreatherThanMax() {
+        String customerId = "id";
+        BigDecimal requestedAmount = BigDecimal.valueOf(11000);
+        Integer period = 12;
+
+        double score = 1.0;
+
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(period);
     }
     
 }
