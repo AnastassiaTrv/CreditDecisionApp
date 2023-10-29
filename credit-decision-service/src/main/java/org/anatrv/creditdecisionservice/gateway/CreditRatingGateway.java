@@ -28,10 +28,14 @@ public class CreditRatingGateway {
         CustomerCreditScore result = null;
 
         if (modifier != null) {
-            // the exactness is not the point here, we just need to get some score and round it up
-            double score = (modifier / amount.doubleValue()) * period;
-            score = (double) Math.round(score * 100) / 100;
-            result = new CustomerCreditScore(customerId, score);
+            if (modifier > 0) {
+                // the exactness is not the point here, we just need to get some score and round it up
+                double score = (modifier / amount.doubleValue()) * period;
+                score = (double) Math.round(score * 100) / 100;
+                result = new CustomerCreditScore(customerId, score, false);
+            } else {
+                result = new CustomerCreditScore(customerId, 0, true);
+            }
         }
 
         return result;

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.anatrv.creditdecisionservice.config.CreditProperties;
 import org.anatrv.creditdecisionservice.gateway.CreditRatingGateway;
 import org.anatrv.creditdecisionservice.model.CreditDecision;
+import org.anatrv.creditdecisionservice.model.CreditRequest;
 import org.anatrv.creditdecisionservice.model.CustomerCreditScore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,25 +24,25 @@ public class DecisionService {
     @Autowired
     private CreditProperties properties;
 
-    public CreditDecision getCreditDecision(String customerId, BigDecimal amountRequested, int periodRequested) {
+    public CreditDecision getCreditDecision(CreditRequest request) {
         BigDecimal maxAmount = properties.getAmountMax();
         BigDecimal minAmount = properties.getAmountMin();
+        BigDecimal amountOffered = request.getAmount();
+        
         int maxPeriod = properties.getPeriodMax();
-        int minPeriod = properties.getPeriodMin();
+        int periodOffered = request.getPeriod();
 
-        var decision = buildRawDecision(amountRequested, periodRequested);
+        var decision = buildRawDecision(request.getAmount(), request.getPeriod());
 
-        // don't reject the decision if the requested period and amount don't fit into our constraints, just adjust them and proceed 
-        int periodOffered = getPeriodInRange(periodRequested, minPeriod, maxPeriod);
-        BigDecimal amountOffered = getAmountInRange(amountRequested, minAmount, maxAmount);
-
-        CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(customerId, amountOffered, periodOffered);
+        CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(request.getCustomerId(), amountOffered, periodOffered);
         if (customerScore == null) {
             // if for some reason external service experiences a trouble and cannot provide us with credit score
             // then we are unable to make a credit decision, we don't want to reject the credit and give a customer bad experience with our service,
             // and we also cannot aproove it without any check, so we leave status UNDEFINED
             decision.setMsg("Unable to obtain customer credit score, try later");
             return decision;
+        } else if (customerScore.isHasDebt()) {
+            rejectDecision(decision, "Customer has debt");
         } else {
             double score = customerScore.getValue();
             if (score > 1) {
@@ -57,7 +58,6 @@ public class DecisionService {
                 if (isGreatherOrEqual(amountOffered, minAmount)) {
                     aprooveDecision(decision, amountOffered, periodOffered);
                 } else {
-                    // we can offer only min amount and not less, but then we have to increase the period
                     periodOffered = changePeriodByScore(periodOffered, score);
                     if (periodOffered <= maxPeriod) {
                         aprooveDecision(decision, minAmount, periodOffered);
@@ -66,11 +66,7 @@ public class DecisionService {
                         rejectDecision(decision, "Customer credit score is too low");
                     }
                 }
-            } else {
-                // if the score is negative, then we cannot offer any amount and give the user a negative decision
-                rejectDecision(decision, "Customer has debt");
             }
-            
         }
 
         return decision;

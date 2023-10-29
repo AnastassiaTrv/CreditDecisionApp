@@ -15,6 +15,7 @@ export class AskForCreditComponent implements OnInit {
   period: number;
   decision: any;
   showInputError = false;
+  errorMsg: string;
 
   ngOnInit() { }
 
@@ -25,9 +26,12 @@ export class AskForCreditComponent implements OnInit {
       decision => {
         this.decision = decision;
       },
-      error => {
+      e => {
         this.decision = null;
-        this.showInputError = error.status === 400; // just wanted to handle a bad request case somehow
+        this.showInputError = true;
+        if (e.error.status === 400 && e.error.message) {
+          this.errorMsg = e.error.message;
+        }
       });
   }
 
@@ -36,6 +40,7 @@ export class AskForCreditComponent implements OnInit {
   }
 
   cleanupPreviousResponse() {
+    this.errorMsg = null;
     this.decision = null;
     this.showInputError = false;
   }

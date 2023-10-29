@@ -21,7 +21,7 @@
     </div>
     <div class="col-lg" *ngIf="showInputError">
         <div class="alert alert-danger align-self-end" role="alert">
-            Unable to obtain credit decision. Input data is wrong.
+            Unable to obtain credit decision. <span *ngIf="errorMsg">{{ errorMsg }}</span>
         </div>
     </div>
 </div>
