@@ -1,9 +1,9 @@
 package org.anatrv.creditdecisionservice.gateway;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.anatrv.creditdecisionservice.model.CreditRequest;
 import org.anatrv.creditdecisionservice.model.CustomerCreditScore;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +23,15 @@ public class CreditRatingGateway {
     }
 
 
-    public CustomerCreditScore getCustomerCreditScore(String customerId, BigDecimal amount, Integer period) {
+    public CustomerCreditScore getCustomerCreditScore(CreditRequest request) {
+        String customerId = request.getCustomerId();
         Integer modifier = customerModifierMap.get(customerId);
         CustomerCreditScore result = null;
 
         if (modifier != null) {
             if (modifier > 0) {
                 // the exactness is not the point here, we just need to get some score and round it up
-                double score = (modifier / amount.doubleValue()) * period;
+                double score = (modifier / request.getAmount().doubleValue()) * request.getPeriod();
                 score = (double) Math.round(score * 100) / 100;
                 result = new CustomerCreditScore(customerId, score, false);
             } else {

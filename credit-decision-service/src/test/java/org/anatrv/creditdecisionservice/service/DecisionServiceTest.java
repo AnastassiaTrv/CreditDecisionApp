@@ -54,15 +54,15 @@ public class DecisionServiceTest {
         Integer period = 15;
 
         double score = 2.5;
+        var request = new CreditRequest(customerId, requestedAmount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, requestedAmount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
@@ -76,15 +76,15 @@ public class DecisionServiceTest {
 
         double score = 1.2;
         BigDecimal increased = BigDecimal.valueOf(6000);
+        var request = new CreditRequest(customerId, requestedAmount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, requestedAmount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(increased);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
@@ -97,15 +97,15 @@ public class DecisionServiceTest {
         Integer period = 15;
 
         double score = 1.0;
+        var request = new CreditRequest(customerId, requestedAmount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, requestedAmount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(requestedAmount);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
@@ -119,15 +119,15 @@ public class DecisionServiceTest {
 
         double score = 0.69874657464;
         BigDecimal increased = BigDecimal.valueOf(3500);
+        var request = new CreditRequest(customerId, requestedAmount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, requestedAmount, period);
         var decision = decisionService.getCreditDecision(request);
 
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(increased);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
@@ -141,15 +141,15 @@ public class DecisionServiceTest {
 
         double score = 0.5;
         BigDecimal desreasedAmount = BigDecimal.valueOf(2500);
+        var request = new CreditRequest(customerId, amount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, amount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(desreasedAmount);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
@@ -164,15 +164,15 @@ public class DecisionServiceTest {
         double score = 0.35;
         BigDecimal desreasedAmount = BigDecimal.valueOf(2000);
         Integer increasedPeriod = 35;
+        var request = new CreditRequest(customerId, amount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
 
-        var request = new CreditRequest(customerId, amount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(desreasedAmount);
         assertThat(decision.getPeriodAprooved()).isEqualTo(increasedPeriod);
@@ -185,15 +185,15 @@ public class DecisionServiceTest {
         Integer period = 15;
 
         double badScore = 0.1;
+        var request = new CreditRequest(customerId, amount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(badScore);
 
-        var request = new CreditRequest(customerId, amount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
@@ -204,14 +204,14 @@ public class DecisionServiceTest {
         String customerId = "id";
         BigDecimal amount = BigDecimal.valueOf(2500);
         Integer period = 15;
+        var request = new CreditRequest(customerId, amount, period);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(true);
 
-        var request = new CreditRequest(customerId, amount, period);
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
@@ -222,13 +222,13 @@ public class DecisionServiceTest {
         String customerId = "id";
         BigDecimal amount = BigDecimal.valueOf(2500);
         Integer period = 15;
-
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(null);
-
         var request = new CreditRequest(customerId, amount, period);
+
+        when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(null);
+
         var decision = decisionService.getCreditDecision(request);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        verify(creditRatingGateway).getCustomerCreditScore(request);
         assertThat(decision.getStatus()).isEqualTo(UNDEFINED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
