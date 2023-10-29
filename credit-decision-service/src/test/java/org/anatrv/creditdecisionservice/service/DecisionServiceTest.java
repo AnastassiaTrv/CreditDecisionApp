@@ -59,92 +59,112 @@ public class DecisionServiceTest {
 
         double score = 2.5;
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveMaxAmount_ifScoreIs1() {
+    public void getCreditDecision_shouldAprooveIncreasedAmount_ifScoreIsMoreThatOne() {
         String customerId = "id";
         BigDecimal requestedAmount = BigDecimal.valueOf(5000);
         Integer period = 15;
 
-        double score = 1;
+        double score = 1.2;
+        BigDecimal increased = BigDecimal.valueOf(6000);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
-        assertThat(decision.getStatus()).isEqualTo(APROOVED);
-        assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
-        assertThat(decision.getPeriodAprooved()).isEqualTo(period);
-    }
-
-    @Test
-    public void getCreditDecision_shouldAprooveIncreasedAmount_ifScoreIsSmallerThatOne() {
-        String customerId = "id";
-        BigDecimal requestedAmount = BigDecimal.valueOf(5000);
-        Integer period = 15;
-
-        double score = 0.75;
-        BigDecimal increased = BigDecimal.valueOf(7500);
-
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
-        when(creditScore.getValue()).thenReturn(score);
-
-        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
-        
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(increased);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveRoundedAmount_ifOfferedAmountIsNotFull() { // for exapmle 6988 should become 7000
+    public void getCreditDecision_shouldAprooveRequestedAmount_ifScoreIs1() {
+        String customerId = "id";
+        BigDecimal requestedAmount = BigDecimal.valueOf(5000);
+        Integer period = 15;
+
+        double score = 1.0;
+
+        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(requestedAmount);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(period);
+    }
+
+    @Test
+    public void getCreditDecision_shouldAprooveRoundedAmount_ifOfferedAmountIsNotFull() { // for exapmle 3493 should become 3500
         String customerId = "id";
         BigDecimal requestedAmount = BigDecimal.valueOf(5000);
         Integer period = 15;
 
         double score = 0.69874657464;
-        BigDecimal increased = BigDecimal.valueOf(7000);
+        BigDecimal increased = BigDecimal.valueOf(3500);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, requestedAmount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
 
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, period);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(increased);
         assertThat(decision.getPeriodAprooved()).isEqualTo(period);
     }
 
     @Test
-    public void getCreditDecision_shouldAprooveDecreasedAmountAndIncreasePeriod_ifScoreIsSmallerThatOne() {
+    public void getCreditDecision_shouldAprooveDecreasedAmount_ifScoreIsSmallerThatOne() {
         String customerId = "id";
         BigDecimal amount = BigDecimal.valueOf(5000);
         Integer period = 12;
 
-        double score = 0.199;
-        BigDecimal desreasedAmount = BigDecimal.valueOf(2000);
-        Integer increasedPeriod = 60;
+        double score = 0.5;
+        BigDecimal desreasedAmount = BigDecimal.valueOf(2500);
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, amount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
+        assertThat(decision.getStatus()).isEqualTo(APROOVED);
+        assertThat(decision.getAmountAprooved()).isEqualTo(desreasedAmount);
+        assertThat(decision.getPeriodAprooved()).isEqualTo(period);
+    }
+
+    @Test
+    public void getCreditDecision_shouldAprooveDecreasedAmountAndIncreasedPeriod_ifScoreIsSmallerThatOne() {
+        String customerId = "id";
+        BigDecimal amount = BigDecimal.valueOf(5000);
+        Integer period = 12;
+
+        double score = 0.35;
+        BigDecimal desreasedAmount = BigDecimal.valueOf(2000);
+        Integer increasedPeriod = 35;
+
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
+        when(creditScore.getValue()).thenReturn(score);
+
+        CreditDecision decision = decisionService.getCreditDecision(customerId, amount, period);
+        
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(desreasedAmount);
         assertThat(decision.getPeriodAprooved()).isEqualTo(increasedPeriod);
@@ -158,12 +178,12 @@ public class DecisionServiceTest {
 
         double badScore = 0.1;
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(badScore);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, amount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
@@ -177,12 +197,12 @@ public class DecisionServiceTest {
 
         double debtScore = -0.5;
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(debtScore);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, amount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
         assertThat(decision.getStatus()).isEqualTo(REJECTED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
@@ -194,11 +214,11 @@ public class DecisionServiceTest {
         BigDecimal amount = BigDecimal.valueOf(2500);
         Integer period = 15;
 
-        when(creditRatingGateway.getCustomerCreditScore(customerId, amountMax, period)).thenReturn(null);
+        when(creditRatingGateway.getCustomerCreditScore(customerId, amount, period)).thenReturn(null);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, amount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, period);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, amount, period);
         assertThat(decision.getStatus()).isEqualTo(UNDEFINED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
@@ -212,12 +232,12 @@ public class DecisionServiceTest {
 
         double score = 2.5;
 
-        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(amountMax), anyInt())).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(requestedAmount), anyInt())).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, periodMin);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, periodMin);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
         assertThat(decision.getPeriodAprooved()).isEqualTo(periodMin);
@@ -231,12 +251,12 @@ public class DecisionServiceTest {
 
         double score = 2.5;
 
-        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(amountMax), anyInt())).thenReturn(creditScore);
+        when(creditRatingGateway.getCustomerCreditScore(eq(customerId), eq(requestedAmount), anyInt())).thenReturn(creditScore);
         when(creditScore.getValue()).thenReturn(score);
 
         CreditDecision decision = decisionService.getCreditDecision(customerId, requestedAmount, period);
         
-        verify(creditRatingGateway).getCustomerCreditScore(customerId, amountMax, periodMax);
+        verify(creditRatingGateway).getCustomerCreditScore(customerId, requestedAmount, periodMax);
         assertThat(decision.getStatus()).isEqualTo(APROOVED);
         assertThat(decision.getAmountAprooved()).isEqualTo(amountMax);
         assertThat(decision.getPeriodAprooved()).isEqualTo(periodMax);
