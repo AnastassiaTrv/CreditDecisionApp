@@ -29,7 +29,7 @@ public class DecisionService {
         BigDecimal minAmount = properties.getAmountMin();
         int maxPeriod = properties.getPeriodMax();
         var decision = buildRawDecision(request.getAmount(), request.getPeriod());
-        
+
         CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(request);
 
         if (customerScore == null) {
@@ -52,23 +52,28 @@ public class DecisionService {
             } else if (score == 1) {
                 aprooveDecision(decision, amount, period);
             } else if (score < 1 && score > 0) {
-                // if the score is less than 1 but still positive then we can try first to decrease the amount,
-                // and if the new amount is smaller than min we then try to increase the period
-                amount = changeAmountByScore(amount, score);
-                if (isGreatherOrEqual(amount, minAmount)) {
-                    aprooveDecision(decision, amount, period);
-                } else {
-                    period = changePeriodByScore(period, score);
-                    if (period <= maxPeriod) {
-                        aprooveDecision(decision, minAmount, period);
-                    } else {
-                        // we cannot offer a loan that would fit into our amount and period constraints
-                        rejectDecision(decision, "Customer credit score is too low");
-                    }
-                }
+                decision = changeByScore(decision, amount, minAmount, period, maxPeriod, score);
             }
         }
 
+        return decision;
+    }
+
+    private CreditDecision changeByScore(CreditDecision decision, BigDecimal amount, BigDecimal minAmount, int period, int maxPeriod, double score) {
+        // if the score is less than 1 but still positive then we can try first to decrease the amount,
+        amount = changeAmountByScore(amount, score);
+        if (isGreatherOrEqual(amount, minAmount)) {
+            aprooveDecision(decision, amount, period);
+        } else {
+             // if the new amount is smaller than min we then try to increase the period
+            period = changePeriodByScore(period, score);
+            if (period <= maxPeriod) {
+                aprooveDecision(decision, minAmount, period);
+            } else {
+                // we cannot offer a loan that would fit into our amount and period constraints
+                rejectDecision(decision, "Customer credit score is too low");
+            }
+        }
         return decision;
     }
 
