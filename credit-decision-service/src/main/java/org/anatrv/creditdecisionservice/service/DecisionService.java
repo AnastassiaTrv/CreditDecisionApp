@@ -25,41 +25,39 @@ public class DecisionService {
     private CreditProperties properties;
 
     public CreditDecision getCreditDecision(CreditRequest request) {
-        BigDecimal maxAmount = properties.getAmountMax();
-        BigDecimal minAmount = properties.getAmountMin();
-        int maxPeriod = properties.getPeriodMax();
         var decision = buildRawDecision(request.getAmount(), request.getPeriod());
 
         CustomerCreditScore customerScore = creditRatingGateway.getCustomerCreditScore(request);
 
         if (customerScore == null) {
-            // if for some reason external service experiences a trouble and cannot provide us with credit score
-            // then we are unable to make a credit decision, we don't want to reject the credit and give a customer bad experience with our service,
+            // unable to make a credit decision, we don't want to reject the credit and give a customer bad experience with our service,
             // and we also cannot aproove it without any check, so we leave status UNDEFINED
             decision.setMsg("Unable to obtain customer credit score, try later");
             return decision;
         } else if (customerScore.isHasDebt()) {
             rejectDecision(decision, "Customer has debt");
         } else {
-            BigDecimal amount = request.getAmount();
-            int period = request.getPeriod();
-            double score = customerScore.getValue();
-
-            if (score > 1) {
-                // we can increase the amount but keep it in range
-                amount = changeAmountByScore(amount, score);
-                aprooveDecision(decision, getAmountInRange(amount, minAmount, maxAmount), period);
-            } else if (score == 1) {
-                aprooveDecision(decision, amount, period);
-            } else if (score < 1 && score > 0) {
-                decision = changeByScore(decision, amount, minAmount, period, maxPeriod, score);
-            }
+            processDecision(decision, request.getAmount(), request.getPeriod(), customerScore.getValue());
         }
 
         return decision;
     }
 
-    private CreditDecision changeByScore(CreditDecision decision, BigDecimal amount, BigDecimal minAmount, int period, int maxPeriod, double score) {
+    private void processDecision(CreditDecision decision, BigDecimal amount, int period, double score) {
+        BigDecimal maxAmount = properties.getAmountMax();
+        BigDecimal minAmount = properties.getAmountMin();
+        if (score > 1) {
+            // we can increase the amount but keep it in range
+            amount = changeAmountByScore(amount, score);
+            aprooveDecision(decision, getAmountInRange(amount, minAmount, maxAmount), period);
+        } else if (score == 1) {
+            aprooveDecision(decision, amount, period);
+        } else if (score < 1 && score > 0) {
+            decreaseDecisionAmount(decision, amount, minAmount, period, score);
+        }
+    }
+
+    private void decreaseDecisionAmount(CreditDecision decision, BigDecimal amount, BigDecimal minAmount, int period, double score) {
         // if the score is less than 1 but still positive then we can try first to decrease the amount,
         amount = changeAmountByScore(amount, score);
         if (isGreatherOrEqual(amount, minAmount)) {
@@ -67,14 +65,13 @@ public class DecisionService {
         } else {
              // if the new amount is smaller than min we then try to increase the period
             period = changePeriodByScore(period, score);
-            if (period <= maxPeriod) {
+            if (period <= properties.getPeriodMax()) {
                 aprooveDecision(decision, minAmount, period);
             } else {
                 // we cannot offer a loan that would fit into our amount and period constraints
                 rejectDecision(decision, "Customer credit score is too low");
             }
         }
-        return decision;
     }
 
     private CreditDecision buildRawDecision(BigDecimal amountRequested, int periodRequested) {

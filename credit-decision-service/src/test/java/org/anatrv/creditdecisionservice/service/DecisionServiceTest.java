@@ -9,7 +9,6 @@ import org.anatrv.creditdecisionservice.config.CreditProperties;
 import org.anatrv.creditdecisionservice.gateway.CreditRatingGateway;
 import org.anatrv.creditdecisionservice.model.CreditRequest;
 import org.anatrv.creditdecisionservice.model.CustomerCreditScore;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,13 +39,6 @@ public class DecisionServiceTest {
     private static BigDecimal amountMin = BigDecimal.valueOf(2000);
     private static Integer periodMax = 60;
 
-    @BeforeEach
-    public void configMockData() {
-        when(properties.getAmountMax()).thenReturn(amountMax);
-        when(properties.getAmountMin()).thenReturn(amountMin);
-        when(properties.getPeriodMax()).thenReturn(periodMax);
-    }
-
     @Test
     public void getCreditDecision_shouldAprooveMaxAmount_ifScoreIsMoreThanOne() {
         String customerId = "id";
@@ -59,6 +51,7 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
         
@@ -81,6 +74,7 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
         
@@ -124,6 +118,7 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
 
@@ -146,6 +141,7 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
         
@@ -169,6 +165,8 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(score);
+        when(properties.getPeriodMax()).thenReturn(periodMax);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
         
@@ -190,6 +188,7 @@ public class DecisionServiceTest {
         when(creditRatingGateway.getCustomerCreditScore(request)).thenReturn(creditScore);
         when(creditScore.isHasDebt()).thenReturn(false);
         when(creditScore.getValue()).thenReturn(badScore);
+        mockAmount();
 
         var decision = decisionService.getCreditDecision(request);
         
@@ -232,6 +231,11 @@ public class DecisionServiceTest {
         assertThat(decision.getStatus()).isEqualTo(UNDEFINED);
         assertThat(decision.getAmountAprooved()).isEqualTo(BigDecimal.ZERO);
         assertThat(decision.getPeriodAprooved()).isEqualTo(0);
+    }
+
+    private void mockAmount() {
+        when(properties.getAmountMax()).thenReturn(amountMax);
+        when(properties.getAmountMin()).thenReturn(amountMin);
     }
 }
 
