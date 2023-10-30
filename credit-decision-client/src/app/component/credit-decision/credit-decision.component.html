@@ -1,4 +1,4 @@
-<table class="table" [ngClass]="getTableClass()">
+<table class="table" [ngClass]="getTableClass()" *ngIf="decision">
     <thead>
       <tr>
         <th scope="col">Requested amount</th>
