@@ -34,10 +34,6 @@ So there can be 4 different scenarios + the case when the score cannot be obtain
   <img src="./demo/no_customer_data.png" width="500">
 </p>
 <br/>
-6. There can be also a 400 Bad request error case and a basic alert message is shown
-<p align="left">
-  <img src="./demo/wrong_input.png" width="500">
-</p>
 
 ## How to run
 1. Start backend server:
